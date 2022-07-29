@@ -115,13 +115,12 @@ def get_filter_matrix(mat):
     adjust_red_green = shifted_g * red_gain
     adjust_red_blue = shifted_b * red_gain * BLUE_MAGIC_VALUE
 
-    return [
+    return np.array([
         adjust_red, adjust_red_green, adjust_red_blue, 0, redOffset,
         0, green_gain, 0, 0, greenOffset,
         0, 0, blue_gain, 0, blueOffset,
         0, 0, 0, 1, 0,
-    ]
-
+    ])
 
 def correct(mat):
     original_mat = mat.copy()
@@ -155,38 +154,53 @@ if __name__ == "__main__":
     
     else:
 
-        # Get video size by reading first frame and closing
+        # Initialize new video writer
         cap = cv2.VideoCapture(sys.argv[2])
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        frame_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        frame_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        new_video = cv2.VideoWriter(sys.argv[3], fourcc, fps, (int(frame_width), int(frame_height)))      
+
+        filter_matrices = []
+        count = 0
+
+        print("Analyzing...")
         while(cap.isOpened()):
+          
+            count += 1  
             ret, frame = cap.read()
-
-            if ret == True:
-                height, width, channels = frame.shape
-
-                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-                video = cv2.VideoWriter(sys.argv[3], fourcc, 60.0, (width, height))
-                
+            if not ret:
                 break
 
-        cap.release()
-        
-        # Opend again to convert
-        cap2 = cv2.VideoCapture(sys.argv[2])
-  
-        while(cap2.isOpened()):
-            ret, frame = cap2.read()
-            if ret == True:
-
+            # Pick filter matrix from every 10th frame
+            if count % 10 == 0:
                 mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                filter_matrices.append(get_filter_matrix(mat))
+            
+        # Create average filter matrix
+        average_filter_matrix = np.mean(filter_matrices, axis=0)
+        cap.release()
 
-                corrected_mat = correct(mat)
+        # Open again to convert
+        cap2 = cv2.VideoCapture(sys.argv[2])
 
-                video.write(corrected_mat) 
-            else:
+        print("Correcting...")
+
+        while(cap2.isOpened()):
+
+            ret, frame = cap2.read()                
+            if not ret:
                 break
-        
-        cap2.release()
-        video.release()
-        cv2.destroyAllWindows()
 
+            # Apply the filter
+            mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            corrected_mat = apply_filter(mat, average_filter_matrix)
+            corrected_mat = cv2.cvtColor(corrected_mat, cv2.COLOR_RGB2BGR)
+
+            new_video.write(corrected_mat) 
+                
+        cap2.release()
+        new_video.release()
+        print("Video written")
