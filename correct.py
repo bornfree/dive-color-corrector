@@ -155,15 +155,38 @@ if __name__ == "__main__":
     
     else:
 
+        # Get video size by reading first frame and closing
         cap = cv2.VideoCapture(sys.argv[2])
+
         while(cap.isOpened()):
             ret, frame = cap.read()
-            mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            corrected_mat = correct(mat)
-            cv2.imshow("Video", corrected_mat)
-            cv2.waitKey(1)
-        
+            if ret == True:
+                height, width, channels = frame.shape
+
+                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                video = cv2.VideoWriter(sys.argv[3], fourcc, 60.0, (width, height))
+                
+                break
+
         cap.release()
+        
+        # Opend again to convert
+        cap2 = cv2.VideoCapture(sys.argv[2])
+  
+        while(cap2.isOpened()):
+            ret, frame = cap2.read()
+            if ret == True:
+
+                mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                corrected_mat = correct(mat)
+
+                video.write(corrected_mat) 
+            else:
+                break
+        
+        cap2.release()
+        video.release()
         cv2.destroyAllWindows()
 
