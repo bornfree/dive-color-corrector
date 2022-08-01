@@ -7,6 +7,7 @@ THRESHOLD_RATIO = 2000
 MIN_AVG_RED = 60
 MAX_HUE_SHIFT = 120
 BLUE_MAGIC_VALUE = 1.2
+FRAME_SAMPLING_RATE = 30 # Extracts color correction from every Nth frame
 
 def hue_shift_red(mat, h):
 
@@ -163,44 +164,58 @@ if __name__ == "__main__":
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         new_video = cv2.VideoWriter(sys.argv[3], fourcc, fps, (int(frame_width), int(frame_height)))      
 
+
+        # Get filter matrices for every 10th frame
+        filter_matrix_indexes = []
         filter_matrices = []
         count = 0
-
+        
         print("Analyzing...")
         while(cap.isOpened()):
           
             count += 1  
+            print(f"{count} frames", end="\r")
             ret, frame = cap.read()
             if not ret:
                 break
 
             # Pick filter matrix from every 10th frame
-            if count % 10 == 0:
+            if count % FRAME_SAMPLING_RATE == 0:
                 mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                filter_matrix_indexes.append(count) 
                 filter_matrices.append(get_filter_matrix(mat))
             
-        # Create average filter matrix
-        average_filter_matrix = np.mean(filter_matrices, axis=0)
         cap.release()
 
-        # Open again to convert
-        cap2 = cv2.VideoCapture(sys.argv[2])
+        # Build a interpolation function to get filter matrix at any given frame
+        filter_matrices = np.array(filter_matrices)
+        filter_matrix_size = len(filter_matrices[0])
+        def get_interpolated_filter_matrix(frame_number):
 
-        print("Correcting...")
+            return [np.interp(frame_number, filter_matrix_indexes, filter_matrices[..., x]) for x in range(filter_matrix_size)]
 
-        while(cap2.isOpened()):
+        print("Processing...")
 
-            ret, frame = cap2.read()                
+        frame_count = count
+        count = 0
+        cap = cv2.VideoCapture(sys.argv[2])
+        while(cap.isOpened()):
+          
+            count += 1  
+            percent = 100*count/frame_count
+            print("{:.2f}".format(percent), end=" % \r")
+            ret, frame = cap.read()
             if not ret:
                 break
 
             # Apply the filter
             mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            corrected_mat = apply_filter(mat, average_filter_matrix)
+            interpolated_filter_matrix = get_interpolated_filter_matrix(count)
+            corrected_mat = apply_filter(mat, interpolated_filter_matrix)
             corrected_mat = cv2.cvtColor(corrected_mat, cv2.COLOR_RGB2BGR)
-
+    
             new_video.write(corrected_mat) 
-                
-        cap2.release()
+        
+
+        cap.release()
         new_video.release()
-        print("Video written")
