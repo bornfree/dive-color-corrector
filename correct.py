@@ -7,7 +7,7 @@ THRESHOLD_RATIO = 2000
 MIN_AVG_RED = 60
 MAX_HUE_SHIFT = 120
 BLUE_MAGIC_VALUE = 1.2
-FRAME_SAMPLING_RATE = 30 # Extracts color correction from every Nth frame
+SAMPLE_SECONDS = 2 # Extracts color correction from every N seconds
 
 def hue_shift_red(mat, h):
 
@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
         # Initialize new video writer
         cap = cv2.VideoCapture(sys.argv[2])
-        fps = cap.get(cv2.CAP_PROP_FPS)
+        fps = math.ceil(cap.get(cv2.CAP_PROP_FPS))
         frame_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         frame_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
@@ -179,8 +179,8 @@ if __name__ == "__main__":
             if not ret:
                 break
 
-            # Pick filter matrix from every 10th frame
-            if count % FRAME_SAMPLING_RATE == 0:
+            # Pick filter matrix from every N seconds
+            if count % (fps * SAMPLE_SECONDS) == 0:
                 mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 filter_matrix_indexes.append(count) 
                 filter_matrices.append(get_filter_matrix(mat))
