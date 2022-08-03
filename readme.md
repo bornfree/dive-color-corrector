@@ -4,10 +4,12 @@ This Python code fixes the colors of your dive and underwater photos and images.
 
 Inspired by the algorithm at https://github.com/nikolajbech/underwater-image-color-correction.
 
-Sample images
+**Sample images**
+
 ![Example](./example.jpg)
 
-Sample video
+**Sample video**
+
 [![Video](https://img.youtube.com/vi/NEpl41-LMBs/0.jpg)](https://www.youtube.com/watch?v=NEpl41-LMBs)
 
 
