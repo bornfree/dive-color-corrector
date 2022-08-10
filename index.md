@@ -1,37 +1,46 @@
-## Welcome to GitHub Pages
+> There are two types of people in the world. Those who are enchanted by the ocean and those who are yet to be.
 
-You can use the [editor on GitHub](https://github.com/bornfree/dive-color-corrector/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Downloads 
 
-### Markdown
+Coming soon
+- Mac
+- Windows
+- Linux
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## FAQ
 
-```markdown
-Syntax highlighted code block
+### Why this tool exists?
+If you've ever shot underwater footage you'd know that it looks bluer and greener than it should.
+That's because the red light of the spectrum gets absorbed as you go deeper into the ocean.
 
-# Header 1
-## Header 2
-### Header 3
+This tool uses image processing algorithms to fix the colors for you.
+It works for both photos and videos.
 
-- Bulleted
-- List
+### How is it different from Dive+?
+This tool is designed to run on computers instead of mobile phones.
+It is possible that anybody who cares about serious video-editing is likely to do it on a laptop instead of a phone.
 
-1. Numbered
-2. List
+Dive+ lets you correct 2 videos a day. 🤨
 
-**Bold** and _Italic_ and `Code` text
+Dive+ also charges a subscription fee. 😂
 
-[Link](url) and ![Image](src)
-```
+Like who wants to correct dive footage month on month?
 
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+### Is the tool free?
+Yes. And you are free to use it however you want.
 
-### Jekyll Themes
+### What are the limitations and restrictions?
+It should support most photos and videos shot on GoPros.
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/bornfree/dive-color-corrector/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+The tool in itself has no restrictions.
+- No watermarks
+- No time limits
+- No locked features
 
-### Support or Contact
+### How can I help?
+If you found this tool helpful, please consider making a donation.
+If you're into Python and image processing, maybe you can take a look at the issues.
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+### Problems?
+Raise an issue [here](https://github.com/bornfree/dive-color-corrector/issues) and I'll take a look.
