@@ -39,7 +39,8 @@ The tool in itself has no restrictions.
 - No locked features
 
 ### How can I help?
-If you found this tool helpful, please consider making a donation.
+If you found this tool helpful, please consider [making a donation](https://buy.stripe.com/28obMb8Mx2EEbRK7ss).
+
 If you're into Python and image processing, maybe you can take a look at the issues.
 
 ### Problems?
