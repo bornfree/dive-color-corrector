@@ -4,8 +4,11 @@
 
 ## Downloads 
 
+
+- [MacOS (arm64)](https://github.com/bornfree/dive-color-corrector/releases/download/v1.0.0/dcc.zip)
+
 Coming soon
-- Mac
+- MacOS x86
 - Windows
 - Linux
 
