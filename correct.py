@@ -133,6 +133,123 @@ def correct(mat):
 
     return corrected_mat
 
+def correct_image(input_path, output_path):
+    mat = cv2.imread(input_path)
+    rgb_mat = cv2.cvtColor(mat, cv2.COLOR_BGR2RGB)
+    
+    corrected_mat = correct(rgb_mat)
+
+    cv2.imwrite(output_path, corrected_mat)
+    
+    preview = mat.copy()
+    width = preview.shape[1] // 2
+    preview[::, width:] = corrected_mat[::, width:]
+
+    preview = cv2.resize(preview, (960, 540))
+
+    return cv2.imencode('.png', preview)[1].tobytes()
+
+
+def analyze_video(input_video_path, output_video_path):
+    
+    # Initialize new video writer
+    cap = cv2.VideoCapture(input_video_path)
+    fps = math.ceil(cap.get(cv2.CAP_PROP_FPS))
+    
+    # Get filter matrices for every 10th frame
+    filter_matrix_indexes = []
+    filter_matrices = []
+    count = 0
+    
+    print("Analyzing...")
+    while(cap.isOpened()):
+        
+        count += 1  
+        print(f"{count} frames", end="\r")
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Pick filter matrix from every N seconds
+        if count % (fps * SAMPLE_SECONDS) == 0:
+            mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            filter_matrix_indexes.append(count) 
+            filter_matrices.append(get_filter_matrix(mat))
+
+        yield count
+        
+    cap.release()
+
+    # Build a interpolation function to get filter matrix at any given frame
+    filter_matrices = np.array(filter_matrices)
+
+    yield {
+        "input_video_path": input_video_path,
+        "output_video_path": output_video_path,
+        "fps": fps,
+        "frame_count": count,
+        "filters": filter_matrices,
+        "filter_indices": filter_matrix_indexes
+    }
+
+def process_video(video_data, yield_preview=False):
+    
+    cap = cv2.VideoCapture(video_data["input_video_path"])
+
+    frame_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    frame_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    new_video = cv2.VideoWriter(video_data["output_video_path"], fourcc, video_data["fps"], (int(frame_width), int(frame_height)))      
+
+    filter_matrices = video_data["filters"]
+    filter_indices = video_data["filter_indices"]
+
+    filter_matrix_size = len(filter_matrices[0])
+    def get_interpolated_filter_matrix(frame_number):
+
+        return [np.interp(frame_number, filter_indices, filter_matrices[..., x]) for x in range(filter_matrix_size)]
+
+    print("Processing...")
+
+    frame_count = video_data["frame_count"]
+
+    count = 0
+    cap = cv2.VideoCapture(video_data["input_video_path"])
+    while(cap.isOpened()):
+        
+        count += 1  
+        percent = 100*count/frame_count
+        print("{:.2f}".format(percent), end=" % \r")
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Apply the filter
+        rgb_mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        interpolated_filter_matrix = get_interpolated_filter_matrix(count)
+        corrected_mat = apply_filter(rgb_mat, interpolated_filter_matrix)
+        corrected_mat = cv2.cvtColor(corrected_mat, cv2.COLOR_RGB2BGR)
+
+        new_video.write(corrected_mat) 
+
+        if yield_preview:
+            preview = frame.copy()
+            width = preview.shape[1] // 2
+            preview[::, width:] = corrected_mat[::, width:]
+
+            preview = cv2.resize(preview, (960, 540))
+
+            yield percent, cv2.imencode('.png', preview)[1].tobytes()
+        else:
+            yield None
+
+    
+
+    cap.release()
+    new_video.release()
+
+
 if __name__ == "__main__":
 
     if len(sys.argv) < 2:
@@ -155,67 +272,10 @@ if __name__ == "__main__":
     
     else:
 
-        # Initialize new video writer
-        cap = cv2.VideoCapture(sys.argv[2])
-        fps = math.ceil(cap.get(cv2.CAP_PROP_FPS))
-        frame_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-        frame_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        for item in analyze_video(sys.argv[2], sys.argv[3]):
 
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        new_video = cv2.VideoWriter(sys.argv[3], fourcc, fps, (int(frame_width), int(frame_height)))      
-
-
-        # Get filter matrices for every 10th frame
-        filter_matrix_indexes = []
-        filter_matrices = []
-        count = 0
-        
-        print("Analyzing...")
-        while(cap.isOpened()):
-          
-            count += 1  
-            print(f"{count} frames", end="\r")
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            # Pick filter matrix from every N seconds
-            if count % (fps * SAMPLE_SECONDS) == 0:
-                mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                filter_matrix_indexes.append(count) 
-                filter_matrices.append(get_filter_matrix(mat))
+            if type(item) == dict:
+                video_data = item
             
-        cap.release()
-
-        # Build a interpolation function to get filter matrix at any given frame
-        filter_matrices = np.array(filter_matrices)
-        filter_matrix_size = len(filter_matrices[0])
-        def get_interpolated_filter_matrix(frame_number):
-
-            return [np.interp(frame_number, filter_matrix_indexes, filter_matrices[..., x]) for x in range(filter_matrix_size)]
-
-        print("Processing...")
-
-        frame_count = count
-        count = 0
-        cap = cv2.VideoCapture(sys.argv[2])
-        while(cap.isOpened()):
-          
-            count += 1  
-            percent = 100*count/frame_count
-            print("{:.2f}".format(percent), end=" % \r")
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            # Apply the filter
-            mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            interpolated_filter_matrix = get_interpolated_filter_matrix(count)
-            corrected_mat = apply_filter(mat, interpolated_filter_matrix)
-            corrected_mat = cv2.cvtColor(corrected_mat, cv2.COLOR_RGB2BGR)
-    
-            new_video.write(corrected_mat) 
+        [x for x in process_video(video_data, yield_preview=False)]
         
-
-        cap.release()
-        new_video.release()
