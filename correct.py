@@ -236,9 +236,10 @@ def process_video(video_data, yield_preview=False):
         if yield_preview:
             preview = frame.copy()
             width = preview.shape[1] // 2
+            height = preview.shape[0] // 2
             preview[::, width:] = corrected_mat[::, width:]
 
-            preview = cv2.resize(preview, (960, 540))
+            preview = cv2.resize(preview, (width, height))
 
             yield percent, cv2.imencode('.png', preview)[1].tobytes()
         else:
