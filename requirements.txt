@@ -1,2 +1,7 @@
 opencv-python
 numpy
+
+# Uncomment the following for building GUI
+
+# py2app
+# PySimpleGUI
