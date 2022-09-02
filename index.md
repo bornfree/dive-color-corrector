@@ -1,6 +1,7 @@
 <img src="logo.png" alt="drawing" width="128"/>
 > There are two types of people in the world. Those who are enchanted by the ocean and those who are yet to be.
 
+<img src="https://github.com/bornfree/dive-color-corrector/blob/main/examples/example.jpg" width="500">
 
 ## Downloads 
 
