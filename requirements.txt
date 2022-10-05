@@ -5,3 +5,4 @@ numpy
 
 # py2app
 # PySimpleGUI
+# pyinstaller

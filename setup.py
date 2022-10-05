@@ -14,6 +14,7 @@ OPTIONS = {
 }
 
 setup(
+    name='Dive Color Corrector',
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},

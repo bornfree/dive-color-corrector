@@ -1,7 +1,5 @@
 ## Dive and underwater image and video color correction
 
-This Python code fixes the colors of your dive and underwater photos and images.
-
 **Sample images**
 
 ![Example](./examples/example.jpg)
@@ -28,17 +26,31 @@ $ python correct.py video /my/raw.mp4 /my/corrected.mp4
 ```
 
 ## GUI
-You can either download [prebuilt binaries](https://bornfree.github.io/dive-color-corrector/) or build one yourself.
+You can either download the [desktop softwares](https://bornfree.github.io/dive-color-corrector/) or build one yourself.
+
+![GUI](./examples/gui.jpg)
 
 ### Building the GUI
-Uncomment the libraries needed for GUI in `requirements.txt` and redo pip install.
+Uncomment the libraries needed for GUI in `requirements.txt` and re-run `pip install`.
 
-Commands for MacOS
+MacOS (via Py2App)
 ```
 $ py2applet --make-setup dcc.py
 $ python setup.py py2app
-# Binaries will be available in 'build' folder
 ```
+
+Windows (via PyInstaller)
+```
+$ python -m PyInstaller -n "Dive Color Corrector" -F -w -i .\logo\logo.ico dcc.py
+```
+
+Linux (via PyInstaller)
+```
+$ pyinstaller -n "Dive Color Corrector" -F -w -i ./logo/logo.png dcc.py
+```
+
+Final builds will be available in 'dist' folder
+
 
 
 ### Share
