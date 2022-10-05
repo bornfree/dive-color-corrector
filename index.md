@@ -1,17 +1,21 @@
-<img src="logo.png" alt="drawing" width="128"/>
-> There are two types of people in the world. Those who are enchanted by the ocean and those who are yet to be.
+<h1>
+<img src="logo.png" alt="drawing" width="40"/>
+Dive Color Corrector </h1>
 
-<img src="https://github.com/bornfree/dive-color-corrector/blob/main/examples/example.jpg?raw=true" width="500">
+Easily color correct your dive and underwater footage for free.
+
+[![Video](https://img.youtube.com/vi/NEpl41-LMBs/0.jpg)](https://www.youtube.com/watch?v=NEpl41-LMBs)
+
+👆 Click to play video
 
 ## Downloads 
+<img src="https://github.com/bornfree/dive-color-corrector/blob/main/examples/gui.jpg?raw=true" width="500">
 
 
-- [MacOS (arm64)](https://github.com/bornfree/dive-color-corrector/releases/download/v1.0.0/dcc.zip)
-
-Coming soon
-- MacOS x86
-- Windows
-- Linux
+- [MacOS (Apple Silicon)](https://github.com/bornfree/dive-color-corrector/releases/download/v1.0.1/Dive.Color.Corrector.arm64.app.zip)
+- [MacOS (Intel)](https://github.com/bornfree/dive-color-corrector/releases/download/v1.0.1/Dive.Color.Corrector.app.zip)
+- [Windows](https://github.com/bornfree/dive-color-corrector/releases/download/v1.0.1/Dive.Color.Corrector.exe)
+- [Linux](https://github.com/bornfree/dive-color-corrector/releases/download/v1.0.1/Dive.Color.Corrector)
 
 ## FAQ
 
