@@ -13,7 +13,7 @@ Easily color correct your dive and underwater footage for free.
 
 
 - [MacOS (Apple Silicon)](https://www.dropbox.com/s/2m8dvuja3c4orw1/MacOS%20arm64.zip?dl=1)
-- [MacOS (Intel)](https://github.com/bornfree/dive-color-corrector/releases/download/v1.0.1/Dive.Color.Corrector.app.zip)
+- [MacOS (Intel)](https://www.dropbox.com/s/owv76bvkd8ujgcb/MacOS%20x86_64.zip?dl=1)
 - [Windows](https://github.com/bornfree/dive-color-corrector/releases/download/v1.0.1/Dive.Color.Corrector.exe)
 - [Linux](https://github.com/bornfree/dive-color-corrector/releases/download/v1.0.1/Dive.Color.Corrector)
 
