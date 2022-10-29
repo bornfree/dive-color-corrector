@@ -1,4 +1,3 @@
-from faulthandler import disable
 import PySimpleGUI as sg
 import os
 from correct import correct_image, analyze_video, process_video
