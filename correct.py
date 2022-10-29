@@ -155,6 +155,7 @@ def analyze_video(input_video_path, output_video_path):
     # Initialize new video writer
     cap = cv2.VideoCapture(input_video_path)
     fps = math.ceil(cap.get(cv2.CAP_PROP_FPS))
+    frame_count = math.ceil(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     
     # Get filter matrices for every 10th frame
     filter_matrix_indexes = []
@@ -168,7 +169,16 @@ def analyze_video(input_video_path, output_video_path):
         print(f"{count} frames", end="\r")
         ret, frame = cap.read()
         if not ret:
-            break
+            # End video read if we have gone beyond reported frame count
+            if count >= frame_count:
+                break
+
+            # Failsafe to prevent an infinite loop
+            if count >= 1e6:
+                break
+
+            # Otherwise this is just a faulty frame read, try reading next frame
+            continue
 
         # Pick filter matrix from every N seconds
         if count % (fps * SAMPLE_SECONDS) == 0:
@@ -222,8 +232,18 @@ def process_video(video_data, yield_preview=False):
         percent = 100*count/frame_count
         print("{:.2f}".format(percent), end=" % \r")
         ret, frame = cap.read()
+        
         if not ret:
-            break
+            # End video read if we have gone beyond reported frame count
+            if count >= frame_count:
+                break
+
+            # Failsafe to prevent an infinite loop
+            if count >= 1e6:
+                break
+
+            # Otherwise this is just a faulty frame read, try reading next
+            continue
 
         # Apply the filter
         rgb_mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
