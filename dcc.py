@@ -5,7 +5,7 @@ import webbrowser
 from logo.logo import LOGO
 
 IMAGE_TYPES = (".png", ".jpeg", ".jpg", ".bmp")
-VIDEO_TYPES = (".mp4", ".mkv", ".avi")
+VIDEO_TYPES = (".mp4", ".mkv", ".avi", ".mov")
 
 sg.theme('DarkGrey6')
 sg.set_options(font=("Arial", 13))
