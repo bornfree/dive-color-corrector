@@ -1,0 +1,66 @@
+name: Build Executables
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
+
+    env:
+      MAIN_PY_FILE: 'dcc.py'  # Define the path to your main.py file here
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.10.x
+
+    - name: Install Python dependencies
+      run: |
+        pip install -r requirements.txt
+      working-directory: ./
+
+    - name: Install Dependencies
+      run: |
+        pip install --no-cache-dir -r requirements.txt
+        pip install --no-cache-dir pyinstaller PySimpleGUI
+      working-directory: ./
+
+    - name: Build executable
+      run: |
+        pyinstaller -n "Dive Color Corrector" -F -w -i .\logo\logo.ico -i ./logo/logo.png ${{ env.MAIN_PY_FILE }}
+      working-directory: ./
+
+    - name: Create Artifact (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-executables
+        path: dist/
+
+    - name: Create Artifact (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-executables
+        path: dist/
+
+    - name: Create Artifact (macOS)
+      if: matrix.os == 'macos-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: macos-executables
+        path: dist/
+
+    - name: List files in dist folder
+      run: ls -R ./dist/
