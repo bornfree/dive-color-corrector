@@ -2,9 +2,9 @@
 
 import PySimpleGUI as sg
 import os
-from ..core.correction import correct_image, analyze_video, process_video
+from dive_color_corrector.core.correction import correct_image, analyze_video, process_video
 import webbrowser
-from .logo import LOGO
+from dive_color_corrector.gui.logo import LOGO
 
 IMAGE_TYPES = (".png", ".jpeg", ".jpg", ".bmp")
 VIDEO_TYPES = (".mp4", ".mkv", ".avi", ".mov")

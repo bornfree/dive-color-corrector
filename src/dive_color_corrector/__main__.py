@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from .core.correction import correct_image, analyze_video
+from dive_color_corrector.core.correction import correct_image, analyze_video
 
 def parse_args():
     """Parse command line arguments."""
@@ -18,7 +18,7 @@ def main():
     
     if args.gui:
         try:
-            from .gui.app import run_gui
+            from dive_color_corrector.gui.app import run_gui
             run_gui()
         except ImportError:
             print("Error: GUI dependencies not installed. Install with: pip install 'dcc[gui]'")
