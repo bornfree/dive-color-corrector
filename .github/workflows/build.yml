@@ -53,7 +53,7 @@ jobs:
 
       - name: List files (Windows)
         if: matrix.os == 'windows-latest'
-        run: dir /s /b dist
+        run: Get-ChildItem -Path dist -Recurse -File | Select-Object FullName
 
       - name: List files (Unix)
         if: matrix.os != 'windows-latest'
