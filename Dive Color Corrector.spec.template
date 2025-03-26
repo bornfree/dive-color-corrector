@@ -5,10 +5,10 @@ block_cipher = None
 
 
 a = Analysis(
-    ['dcc.py'],
+    ['src/dive_color_corrector/__main__.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('src/dive_color_corrector/gui/assets', 'dive_color_corrector/gui/assets')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -41,5 +41,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='logo\\logo.ico',
+    icon='logo/logo.png'
 )
