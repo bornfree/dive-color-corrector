@@ -41,12 +41,12 @@ jobs:
       - name: Generate spec file (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          uv run pyinstaller --name "Dive Color Corrector" --windowed --icon "logo/logo.png" --add-data "src/dive_color_corrector/gui/assets;dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
+          uv run pyinstaller --name "Dive Color Corrector" --windowed --onefile --icon "logo/logo.png" --add-data "src/dive_color_corrector/gui/assets;dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
 
       - name: Generate spec file (Unix)
         if: matrix.os != 'windows-latest'
         run: |
-          uv run pyinstaller --name "Dive Color Corrector" --windowed --icon "logo/logo.png" --add-data "src/dive_color_corrector/gui/assets:dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
+          uv run pyinstaller --name "Dive Color Corrector" --windowed --onefile --icon "logo/logo.png" --add-data "src/dive_color_corrector/gui/assets:dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
 
       - name: Build executable
         run: uv run pyinstaller --clean --noconfirm "Dive Color Corrector.spec"
@@ -63,7 +63,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dive-color-corrector-${{ matrix.os }}
-          path: ${{ matrix.os == 'windows-latest' && 'dist\Dive Color Corrector' || 'dist/Dive Color Corrector' }}
+          path: ${{ matrix.os == 'windows-latest' && 'dist/Dive Color Corrector.exe' || 'dist/Dive Color Corrector' }}
           retention-days: 5
           if-no-files-found: error
           compression-level: 9
