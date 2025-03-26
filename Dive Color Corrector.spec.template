@@ -8,7 +8,10 @@ a = Analysis(
     ['src/dive_color_corrector/__main__.py'],
     pathex=[],
     binaries=[],
-    datas=[('src/dive_color_corrector/gui/assets', 'dive_color_corrector/gui/assets')],
+    datas=[
+        ('src/dive_color_corrector/gui/assets', 'dive_color_corrector/gui/assets'),
+        ('src/dive_color_corrector/models/deep_sesr_2x_1d.h5', 'dive_color_corrector/models'),
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -41,5 +44,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='logo/logo.png'
+    icon='src/dive_color_corrector/gui/assets/logo.png'
 )

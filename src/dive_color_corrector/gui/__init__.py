@@ -1,1 +1,1 @@
-"""GUI components for dive color correction.""" 
+"""GUI components for dive color correction."""

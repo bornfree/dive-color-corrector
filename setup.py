@@ -5,7 +5,7 @@ Usage:
     python setup.py py2app
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 APP = ['dcc.py']
 DATA_FILES = []

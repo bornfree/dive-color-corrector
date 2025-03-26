@@ -1,1 +1,1 @@
-"""Core functionality for dive color correction.""" 
+"""Core functionality for dive color correction."""
