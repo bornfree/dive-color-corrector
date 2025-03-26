@@ -1,9 +1,10 @@
-name: Build Executables
+name: Build and Release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'  # Trigger on version tags
+  workflow_dispatch:  # Allow manual trigger
 
 jobs:
   build:
@@ -12,9 +13,13 @@ jobs:
       fail-fast: false
       matrix:
         os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
-
-    env:
-      MAIN_PY_FILE: 'dcc.py'  # Define the path to your main.py file here
+        include:
+          - os: windows-latest
+            artifact_name: DiveColorCorrector-windows
+          - os: ubuntu-latest
+            artifact_name: DiveColorCorrector-linux
+          - os: macos-latest
+            artifact_name: DiveColorCorrector-macos
 
     steps:
     - name: Checkout code
@@ -23,44 +28,37 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.10.x
+        python-version: "3.11"
 
-    - name: Install Python dependencies
+    - name: Install uv
       run: |
-        pip install -r requirements.txt
-      working-directory: ./
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
-    - name: Install Dependencies
+    - name: Install dependencies
       run: |
-        pip install --no-cache-dir -r requirements.txt
-        pip install --no-cache-dir pyinstaller PySimpleGUI Pillow
-      working-directory: ./
+        uv pip install -e ".[gui]"
+        uv pip install hatch
 
     - name: Build executable
       run: |
-        pyinstaller -n "Dive Color Corrector" -F -w -i ./logo/logo.png ${{ env.MAIN_PY_FILE }}
-      working-directory: ./
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          hatch build -t standalone
+          cp dist/DiveColorCorrector.exe dist/
+        elif [ "$RUNNER_OS" == "macOS" ]; then
+          hatch build -t standalone
+          cp -r dist/DiveColorCorrector.app dist/
+        else
+          hatch build -t standalone
+          cp dist/DiveColorCorrector dist/
+        fi
 
-    - name: Create Artifact (Windows)
-      if: matrix.os == 'windows-latest'
+    - name: Create Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: DiveColorCorrector-windows
+        name: ${{ matrix.artifact_name }}
         path: dist/
-
-    - name: Create Artifact (Linux)
-      if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v4
-      with:
-        name: DiveColorCorrector-linux
-        path: dist/
-
-    - name: Create Artifact (macOS)
-      if: matrix.os == 'macos-latest'
-      uses: actions/upload-artifact@v4
-      with:
-        name: DiveColorCorrector-m
-        path: dist/
+        retention-days: 5
 
     - name: List files in dist folder
       run: ls -R ./dist/

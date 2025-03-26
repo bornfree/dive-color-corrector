@@ -27,10 +27,6 @@
 		"ghcr.io/devcontainers/features/git:1": {
 			"version": "os-provided",
 			"ppa": "false"
-		},
-		// black formatter
-		"ghcr.io/devcontainers-extra/features/black:2": {
-			"installBlack": "true"
 		}
 	},
 	

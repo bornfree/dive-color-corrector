@@ -1,0 +1,16 @@
+[build.targets.standalone]
+name = "DiveColorCorrector"
+icon = "logo/logo.png"
+
+[build.targets.standalone.windows]
+exe = true
+
+[build.targets.standalone.macos]
+app = true
+
+[build.targets.standalone.linux]
+bin = true
+
+[build.targets.standalone.include]
+dcc = "dcc/**/*.py"
+assets = "dcc/gui/assets/**/*" 
