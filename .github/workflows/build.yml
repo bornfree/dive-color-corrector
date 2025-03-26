@@ -63,8 +63,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dive-color-corrector-${{ matrix.os }}
-          path: dist/${{ matrix.executable_name }}
+          path: ${{ matrix.os == 'windows-latest' && 'dist\Dive Color Corrector.exe' || 'dist/Dive Color Corrector' }}
           retention-days: 5
+          if-no-files-found: error
+          compression-level: 9
+          overwrite: false
+          include-hidden-files: false
 
   release:
     name: Create Release
