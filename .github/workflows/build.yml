@@ -38,24 +38,26 @@ jobs:
           uv pip install -e ".[gui]"
           uv pip install pyinstaller pillow
 
-      - name: Generate spec file
+      - name: Generate spec file (Windows)
+        if: matrix.os == 'windows-latest'
         run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            uv run pyinstaller --name "Dive Color Corrector" --windowed --icon "logo/logo.png" --add-data "src/dive_color_corrector/gui/assets;dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
-          else
-            uv run pyinstaller --name "Dive Color Corrector" --windowed --icon "logo/logo.png" --add-data "src/dive_color_corrector/gui/assets:dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
-          fi
+          uv run pyinstaller --name "Dive Color Corrector" --windowed --icon "logo/logo.png" --add-data "src/dive_color_corrector/gui/assets;dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
+
+      - name: Generate spec file (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          uv run pyinstaller --name "Dive Color Corrector" --windowed --icon "logo/logo.png" --add-data "src/dive_color_corrector/gui/assets:dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
 
       - name: Build executable
         run: uv run pyinstaller --clean --noconfirm "Dive Color Corrector.spec"
 
-      - name: List files in dist folder
-        run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            dir /s /b dist
-          else
-            ls -R ./dist/
-          fi
+      - name: List files (Windows)
+        if: matrix.os == 'windows-latest'
+        run: dir /s /b dist
+
+      - name: List files (Unix)
+        if: matrix.os != 'windows-latest'
+        run: find dist -type f -exec ls -lh {} \;
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
