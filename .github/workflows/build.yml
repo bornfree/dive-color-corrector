@@ -24,6 +24,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history for changelog
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -34,6 +36,15 @@ jobs:
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Create and activate virtual environment
+      run: |
+        uv venv
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          .venv/Scripts/activate
+        else
+          source .venv/bin/activate
+        fi
 
     - name: Install dependencies
       run: |
@@ -70,6 +81,38 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for changelog
+
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          # Get the current tag
+          CURRENT_TAG=${{ github.ref_name }}
+          
+          # Get the previous tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            # If no previous tag, get all commits
+            CHANGELOG=$(git log --pretty=format:"* %s (%h)" HEAD)
+          else
+            # Get commits between previous tag and current tag
+            CHANGELOG=$(git log --pretty=format:"* %s (%h)" $PREVIOUS_TAG..HEAD)
+          fi
+          
+          # Create release body
+          echo "## Changes since $PREVIOUS_TAG" > release_body.md
+          echo "" >> release_body.md
+          echo "$CHANGELOG" >> release_body.md
+          
+          # Set the changelog as an output variable
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          cat release_body.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -80,6 +123,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: Release ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.changelog }}
           draft: false
           prerelease: false
           files: |
