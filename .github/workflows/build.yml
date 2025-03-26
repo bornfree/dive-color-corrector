@@ -40,20 +40,22 @@ jobs:
 
       - name: Generate spec file
         run: |
-          uv run pyinstaller --name "Dive Color Corrector" \
-                           --windowed \
-                           --icon "logo/logo.png" \
-                           --add-data "src/dive_color_corrector/gui/assets:dive_color_corrector/gui/assets" \
-                           --clean \
-                           --noconfirm \
-                           src/dive_color_corrector/__main__.py
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            uv run pyinstaller --name "Dive Color Corrector" --windowed --icon "logo/logo.png" --add-data "src/dive_color_corrector/gui/assets;dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
+          else
+            uv run pyinstaller --name "Dive Color Corrector" --windowed --icon "logo/logo.png" --add-data "src/dive_color_corrector/gui/assets:dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
+          fi
 
       - name: Build executable
-        run: |
-          uv run pyinstaller --clean --noconfirm "Dive Color Corrector.spec"
+        run: uv run pyinstaller --clean --noconfirm "Dive Color Corrector.spec"
 
       - name: List files in dist folder
-        run: ls -R ./dist/
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            dir /s /b dist
+          else
+            ls -R ./dist/
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
