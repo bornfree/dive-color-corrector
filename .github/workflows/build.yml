@@ -2,133 +2,76 @@ name: Build and Release
 
 on:
   push:
+    branches: [ main ]
     tags:
-      - 'v*'  # Trigger on version tags
-  workflow_dispatch:  # Allow manual trigger
+      - 'v*'
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   build:
+    name: Build Package
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
-        os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
-        include:
-          - os: windows-latest
-            artifact_name: DiveColorCorrector-windows
-          - os: ubuntu-latest
-            artifact_name: DiveColorCorrector-linux
-          - os: macos-latest
-            artifact_name: DiveColorCorrector-macos
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.11"]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0  # Fetch all history for changelog
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
 
-    - name: Install uv
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      - name: Install dependencies
+        run: |
+          uv pip install -e ".[gui]"
+          uv pip install pyinstaller
 
-    - name: Create and activate virtual environment
-      run: |
-        uv venv
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          .venv/Scripts/activate
-        else
-          source .venv/bin/activate
-        fi
+      - name: Build executable
+        run: |
+          uv run pyinstaller "Dive Color Corrector.spec"
 
-    - name: Install dependencies
-      run: |
-        uv pip install -e ".[gui]"
-        uv pip install hatch
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dive-color-corrector-${{ matrix.os }}
+          path: dist/*
+          retention-days: 5
 
-    - name: Build executable
-      run: |
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          hatch build -t standalone
-          cp dist/DiveColorCorrector.exe dist/
-        elif [ "$RUNNER_OS" == "macOS" ]; then
-          hatch build -t standalone
-          cp -r dist/DiveColorCorrector.app dist/
-        else
-          hatch build -t standalone
-          cp dist/DiveColorCorrector dist/
-        fi
-
-    - name: Create Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ matrix.artifact_name }}
-        path: dist/
-        retention-days: 5
-
-    - name: List files in dist folder
-      run: ls -R ./dist/
-    
   release:
     name: Create Release
-    runs-on: ubuntu-latest
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Fetch all history for changelog
-
-      - name: Generate Changelog
-        id: changelog
-        run: |
-          # Get the current tag
-          CURRENT_TAG=${{ github.ref_name }}
-          
-          # Get the previous tag
-          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          
-          if [ -z "$PREVIOUS_TAG" ]; then
-            # If no previous tag, get all commits
-            CHANGELOG=$(git log --pretty=format:"* %s (%h)" HEAD)
-          else
-            # Get commits between previous tag and current tag
-            CHANGELOG=$(git log --pretty=format:"* %s (%h)" $PREVIOUS_TAG..HEAD)
-          fi
-          
-          # Create release body
-          echo "## Changes since $PREVIOUS_TAG" > release_body.md
-          echo "" >> release_body.md
-          echo "$CHANGELOG" >> release_body.md
-          
-          # Set the changelog as an output variable
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          cat release_body.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+      - uses: actions/checkout@v4
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-          
+          merge-multiple: true
+
       - name: Create Release
-        id: create_release
         uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
-          name: Release ${{ github.ref_name }}
-          body: ${{ steps.changelog.outputs.changelog }}
+          files: artifacts/**/*
           draft: false
           prerelease: false
-          files: |
-            artifacts/DiveColorCorrector-windows/*
-            artifacts/DiveColorCorrector-linux/*
-            artifacts/DiveColorCorrector-macos/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          generate_release_notes: true
+
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v1
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          files: artifacts/**/*
+          draft: true
+          prerelease: true
+          generate_release_notes: true
+          tag_name: draft-${{ github.sha }}

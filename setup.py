@@ -5,7 +5,7 @@ Usage:
     python setup.py py2app
 """
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 APP = ['dcc.py']
 DATA_FILES = []
@@ -14,7 +14,18 @@ OPTIONS = {
 }
 
 setup(
-    name='Dive Color Corrector',
+    name="dive-color-corrector",
+    version="1.2.0",
+    packages=find_packages(),
+    include_package_data=True,
+    python_requires=">=3.11",
+    install_requires=[
+        "opencv-python>=4.8.0",
+        "numpy>=1.24.0",
+    ],
+    extras_require={
+        "gui": ["PySimpleGUI>=4.60.0"],
+    },
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},

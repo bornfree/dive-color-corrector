@@ -1,6 +1,6 @@
 [project]
-name = "dive-color-corrector"
-version = "1.2.0"
+name = "dive_color_corrector"
+dynamic = ["version"]
 description = "A tool for correcting underwater images"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -18,21 +18,11 @@ gui = [
 requires = ["hatchling>=1.18.0"]
 build-backend = "hatchling.build"
 
+[tool.hatch.version]
+path = "src/dive_color_corrector/__init__.py"
+
+[tool.hatch.build]
+packages = ["src/dive_color_corrector"]
+
 [tool.hatch.build.targets.wheel]
-packages = ["dcc"]
-
-[tool.hatch.build.targets.sdist]
-include = [
-    "dcc/**/*.py",
-    "dcc/gui/assets/**/*",
-]
-
-[tool.hatch.build.targets.standalone]
-include = [
-    "dcc/**/*.py",
-    "dcc/gui/assets/**/*",
-]
-
-[tool.hatch.build.targets.standalone.dependencies]
-pyinstaller = { version = ">=6.0.0", platforms = ["windows", "linux"] }
-py2app = { version = ">=0.28.0", platforms = ["darwin"] }
+packages = ["src/dive_color_corrector"]
