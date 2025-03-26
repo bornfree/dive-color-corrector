@@ -15,6 +15,16 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.11"]
+        include:
+          - os: windows-latest
+            executable_name: "Dive Color Corrector.exe"
+            venv_activate: ".venv/Scripts/activate"
+          - os: ubuntu-latest
+            executable_name: "Dive Color Corrector"
+            venv_activate: "source .venv/bin/activate"
+          - os: macos-latest
+            executable_name: "Dive Color Corrector"
+            venv_activate: "source .venv/bin/activate"
 
     steps:
       - uses: actions/checkout@v4
@@ -33,13 +43,13 @@ jobs:
 
       - name: Build executable
         run: |
-          uv run pyinstaller "Dive Color Corrector.spec"
+          uv run pyinstaller "Dive Color Corrector.spec" --clean --noconfirm
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dive-color-corrector-${{ matrix.os }}
-          path: dist/*
+          path: dist/${{ matrix.executable_name }}
           retention-days: 5
 
   release:
