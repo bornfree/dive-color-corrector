@@ -36,19 +36,11 @@ def normalizing_interval(array):
     return (low, high)
 
 def apply_filter(mat, filt):
-
-    r = mat[..., 0]
-    g = mat[..., 1]
-    b = mat[..., 2]
-
-    r = r * filt[0] + g*filt[1] + b*filt[2] + filt[4]*255
-    g = g * filt[6] + filt[9] * 255
-    b = b * filt[12] + filt[14] * 255
-
-    filtered_mat = np.dstack([r, g, b])
-    filtered_mat = np.clip(filtered_mat, 0, 255).astype(np.uint8)
-
-    return filtered_mat
+    filtered_mat = np.zeros_like(mat, dtype=np.float32)
+    filtered_mat[..., 0] = mat[..., 0] * filt[0] + mat[..., 1] * filt[1] + mat[..., 2] * filt[2] + filt[4] * 255
+    filtered_mat[..., 1] = mat[..., 1] * filt[6] + filt[9] * 255
+    filtered_mat[..., 2] = mat[..., 2] * filt[12] + filt[14] * 255
+    return np.clip(filtered_mat, 0, 255).astype(np.uint8)
 
 def get_filter_matrix(mat):
 
