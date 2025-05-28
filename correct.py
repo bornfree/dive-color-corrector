@@ -194,35 +194,37 @@ def analyze_video(input_video_path, output_video_path):
         "filter_indices": filter_matrix_indexes
     }
 
-def process_video(video_data, yield_preview=False):
-    
-    cap = cv2.VideoCapture(video_data["input_video_path"])
-
-    frame_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-    frame_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    new_video = cv2.VideoWriter(video_data["output_video_path"], fourcc, video_data["fps"], (int(frame_width), int(frame_height)))      
-
-    filter_matrices = video_data["filters"]
-    filter_indices = video_data["filter_indices"]
-
+def precompute_filter_matrices(frame_count, filter_indices, filter_matrices):
     filter_matrix_size = len(filter_matrices[0])
-    def get_interpolated_filter_matrix(frame_number):
+    frame_numbers = np.arange(frame_count)
+    interpolated_matrices = np.zeros((frame_count, filter_matrix_size))
+    for x in range(filter_matrix_size):
+        interpolated_matrices[:, x] = np.interp(frame_numbers, filter_indices, filter_matrices[:, x])
+    return interpolated_matrices
 
-        return [np.interp(frame_number, filter_indices, filter_matrices[..., x]) for x in range(filter_matrix_size)]
-
-    print("Processing...")
-
+def process_video(video_data, yield_preview=False):
+    cap = cv2.VideoCapture(video_data["input_video_path"])
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = video_data["fps"]
     frame_count = video_data["frame_count"]
 
+    # Initialize VideoWriter
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    new_video = cv2.VideoWriter(video_data["output_video_path"], fourcc, fps, (frame_width, frame_height))
+
+    # Precompute interpolated filter matrices
+    print("Precomputing filter matrices...")
+    interpolated_matrices = precompute_filter_matrices(
+        frame_count, video_data["filter_indices"], np.array(video_data["filters"])
+    )
+
+    print("Processing...")
     count = 0
-    cap = cv2.VideoCapture(video_data["input_video_path"])
-    while(cap.isOpened()):
-        
-        count += 1  
-        percent = 100*count/frame_count
-        print("{:.2f}".format(percent), end=" % \r")
+    while cap.isOpened():
+        count += 1
+        percent = 100 * count / frame_count
+        print("{:.2f}%".format(percent), end="\r")
         ret, frame = cap.read()
         
         if not ret:
@@ -237,19 +239,17 @@ def process_video(video_data, yield_preview=False):
             # Otherwise this is just a faulty frame read, try reading next
             continue
 
-        # Apply the filter
+        # Apply the filter using precomputed matrix
         rgb_mat = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        interpolated_filter_matrix = get_interpolated_filter_matrix(count)
-        corrected_mat = apply_filter(rgb_mat, interpolated_filter_matrix)
+        corrected_mat = apply_filter(rgb_mat, interpolated_matrices[count - 1])
         corrected_mat = cv2.cvtColor(corrected_mat, cv2.COLOR_RGB2BGR)
-
-        new_video.write(corrected_mat) 
+        new_video.write(corrected_mat)
 
         if yield_preview:
             preview = frame.copy()
             width = preview.shape[1] // 2
             height = preview.shape[0] // 2
-            preview[::, width:] = corrected_mat[::, width:]
+            preview[:, width:] = corrected_mat[:, width:]
 
             preview = cv2.resize(preview, (width, height))
 
