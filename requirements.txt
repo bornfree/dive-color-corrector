@@ -1,5 +1,8 @@
+
 opencv-python
 numpy
+tensorflow-cpu>=2.16.0,<=2.19.0  # Compatible with current platform
+keras>=3.5.0  # Updated to match TensorFlow version
 
 # Uncomment the following for building GUI
 

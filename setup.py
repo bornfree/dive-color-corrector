@@ -22,6 +22,8 @@ setup(
     install_requires=[
         "opencv-python>=4.8.0",
         "numpy>=1.24.0",
+        "tensorflow-cpu>=2.16.0,<=2.19.0",  # Compatible with current platform
+        "keras>=3.5.0",  # Updated to match TensorFlow version
     ],
     extras_require={
         "gui": ["PySimpleGUI>=4.60.0"],
