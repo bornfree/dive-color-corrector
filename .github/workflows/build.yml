@@ -13,14 +13,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]  # Removed macos-latest due to TensorFlow compatibility issues
         python-version: ["3.11"]
         include:
           - os: windows-latest
             executable_name: "Dive Color Corrector.exe"
           - os: ubuntu-latest
-            executable_name: "Dive Color Corrector"
-          - os: macos-latest
             executable_name: "Dive Color Corrector"
 
     steps:
