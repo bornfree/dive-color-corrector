@@ -31,23 +31,26 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "pyproject.toml"
 
+      - name: Install system dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils
+
       - name: Install dependencies
         run: |
           uv pip install -e ".[gui]"
           uv pip install pyinstaller pillow
 
-      - name: Generate spec file (Windows)
+      - name: Build executable (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          uv run pyinstaller --name "Dive Color Corrector" --windowed --onefile --icon "logo/logo.png" --add-data "src/dive_color_corrector/gui/assets;dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
+          uv run pyinstaller --name "Dive Color Corrector" --windowed --onefile --icon "src/dive_color_corrector/gui/assets/logo.png" --add-data "src/dive_color_corrector/gui/assets;dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
 
-      - name: Generate spec file (Unix)
+      - name: Build executable (Unix)
         if: matrix.os != 'windows-latest'
         run: |
-          uv run pyinstaller --name "Dive Color Corrector" --windowed --onefile --icon "logo/logo.png" --add-data "src/dive_color_corrector/gui/assets:dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
-
-      - name: Build executable
-        run: uv run pyinstaller --clean --noconfirm "Dive Color Corrector.spec"
+          uv run pyinstaller --name "Dive Color Corrector" --windowed --onefile --icon "src/dive_color_corrector/gui/assets/logo.png" --add-data "src/dive_color_corrector/gui/assets:dive_color_corrector/gui/assets" --clean --noconfirm src/dive_color_corrector/__main__.py
 
       - name: List files (Windows)
         if: matrix.os == 'windows-latest'
