@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import cv2
 import math
+from PIL import Image
 
 THRESHOLD_RATIO = 2000
 MIN_AVG_RED = 60
@@ -134,12 +135,21 @@ def correct(mat):
     return corrected_mat
 
 def correct_image(input_path, output_path):
-    mat = cv2.imread(input_path)
+    exif_data = None
+    with Image.open(input_path) as image:
+        exif_data = image.info.get("exif")
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+        mat = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+
     rgb_mat = cv2.cvtColor(mat, cv2.COLOR_BGR2RGB)
-    
     corrected_mat = correct(rgb_mat)
 
-    cv2.imwrite(output_path, corrected_mat)
+    output_image = Image.fromarray(cv2.cvtColor(corrected_mat, cv2.COLOR_BGR2RGB))
+    save_kwargs = {}
+    if exif_data:
+        save_kwargs["exif"] = exif_data
+    output_image.save(output_path, **save_kwargs)
     
     preview = mat.copy()
     width = preview.shape[1] // 2
